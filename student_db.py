@@ -102,4 +102,42 @@ class Database():
 
         self.disconnect()
 
-    
+    def get_student(self, student_id):
+        self.connect()
+
+        self.cursor.execute('''
+                            SELECT students.name, subjects.name, grades.grade
+                            FROM grades
+                            JOIN students ON grades.student_id = students.id
+                            JOIN subjects ON grades.subject_id = subjects.id
+                            WHERE students.id = ?
+                            ''', (student_id,)
+        )
+
+        results = self.cursor.fetchall()
+
+        self.disconnect()
+
+        student_name = results[0][0]
+
+        print(f"Результати студента {student_name}: ")
+        grades_list = [(subject, grade) for _, subject, grade in results]
+        print(grades_list)
+
+    def get_avg_grade(self, student_id):
+        self.connect()
+
+        self.cursor.execute('''
+                            SELECT students.name, AVG(grades.grade)
+                            FROM grades
+                            JOIN students ON grades.student_id = students.id
+                            WHERE students.id = ?
+                            ''', (student_id,)
+        )
+        
+        results = self.cursor.fetchone()
+
+        self.disconnect()
+
+        student_name, avg_grade = results
+        print(f"Середній бал студента {student_name}: {avg_grade}")
